@@ -1,4 +1,4 @@
-import {json, send} from 'micro';
+import send from '@polka/send-type';
 
 export function getIndex(request, response) {
 	send(response, 200, {message: 'A three day monk'});
@@ -15,6 +15,5 @@ export function getPollResultsById(request, response) {
 }
 
 export async function postCommand(request, response) {
-	const command = await json(request);
-	send(response, 202, {command});
+	send(response, 202, {command: request.body});
 }
