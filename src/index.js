@@ -2,16 +2,16 @@ import {json} from 'body-parser';
 import polka from 'polka';
 import WebSocket from 'ws';
 
-import {getIndex, getPollById, getPollResultsById, postCommand} from './routes';
+import * as routes from './routes/index';
 
 const {PORT = 3000, HOST = '::'} = process.env;
 
 const app = polka()
 	.use(json())
-	.get('/', getIndex)
-	.get('/api/poll/:aggregateId', getPollById)
-	.get('/api/poll/:aggregateId/results', getPollResultsById)
-	.post('/api/command', postCommand);
+	.get('/', routes.getIndex)
+	.get('/api/poll/:aggregateId', routes.getPollById)
+	.get('/api/poll/:aggregateId/results', routes.getPollResultsById)
+	.post('/api/command', routes.postCommand);
 
 const wss = new WebSocket.Server({server: app.server, path: '/ws'});
 

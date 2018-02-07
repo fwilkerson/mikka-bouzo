@@ -4,7 +4,7 @@
 	"description": "A three day monk.",
 	"main": "dist/index.js",
 	"scripts": {
-		"build": "xo && microbundle -f cjs",
+		"build": "xo && microbundle -f cjs --external all",
 		"start": "SET NODE_ENV=production&& node dist/index.js"
 	},
 	"repository": {
@@ -21,7 +21,9 @@
 	"dependencies": {
 		"@polka/send-type": "^0.3.2",
 		"body-parser": "^1.18.2",
+		"level": "^2.1.2",
 		"polka": "^0.3.2",
+		"uuid": "^3.2.1",
 		"ws": "^4.0.0"
 	},
 	"devDependencies": {
@@ -31,9 +33,6 @@
 	"optionalDependencies": {
 		"bufferutil": "^3.0.3",
 		"utf-8-validate": "^4.0.0"
-	},
-	"peerDependencies": {
-		"body-parser": "^1.18.2"
 	},
 	"xo": {
 		"prettier": true
