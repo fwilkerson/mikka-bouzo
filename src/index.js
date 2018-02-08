@@ -3,24 +3,23 @@ import polka from 'polka';
 
 import createRoutes from './lib/routes';
 import createStore from './lib/store';
-import createWebSocket from './lib/web-socket';
 
-async function start() {
-	const store = await createStore('./dist/event-store');
-
-	const service = polka().use(parser.json());
-	const wss = createWebSocket(service.server);
-	const routes = createRoutes({store, wss});
+(async () => {
 	const {PORT = 3000, HOST = '::'} = process.env;
 
-	await service
+	const app = polka().use(parser.json());
+	const store = await createStore({app, location: './dist/event-store'});
+	const routes = createRoutes({store});
+
+	app
 		.get('/', routes.getIndex)
 		.get('/api/poll/:aggregateId', routes.getPollById)
 		.get('/api/poll/:aggregateId/results', routes.getPollResultsById)
-		.post('/api/command', routes.postCommand)
-		.listen(PORT, HOST);
+		.post('/api/command', routes.postCommand);
+
+	await app.listen(PORT, HOST);
 
 	console.log(`> Running on port ${PORT}`);
-}
 
-start();
+	return app;
+})();

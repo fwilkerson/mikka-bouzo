@@ -23,45 +23,79 @@ export function isValidCommand(command) {
 	);
 }
 
-async function createPoll(store, payload) {
-	// 1. Validate payload
-
-	// 2. Generate aggregateId
-	const aggregateId = uuid();
-
-	// 3. Commit the event
-	try {
-		await store.append({
-			_id: String(++store.sequence),
-			aggregateId,
-			type: eventTypes.POLL_CREATED,
-			payload
-		});
-	} catch (err) {
-		return Promise.reject(err);
+function count(iterable, predicate) {
+	if (predicate === undefined || typeof iterable === 'string') {
+		return iterable.length;
 	}
-
-	// 4. Return the aggregateId to the client
-	return {aggregateId};
+	return iterable.filter(predicate).length;
 }
 
-async function voteOnPoll(store, payload) {
-	// 1. Validate payload
-	const {aggregateId} = payload;
+function isNullOrWhiteSpace(str) {
+	return str === null || str === undefined || str.trim() === '';
+}
 
-	// 2. Commit the event
-	try {
-		await store.append({
-			_id: String(++store.sequence),
-			aggregateId,
-			type: eventTypes.POLL_VOTED_ON,
-			payload
-		});
-	} catch (err) {
-		return Promise.reject(err);
+function createPoll(store, payload) {
+	// 1. Validate payload
+	const {pollOptions, pollQuestion} = payload;
+
+	if (!Array.isArray(pollOptions) || typeof pollQuestion !== 'string') {
+		throw new TypeError('Invalid payload');
 	}
 
-	// 3. Return the aggregateId to the client
+	if (count(pollQuestion) === 0) {
+		throw new Error('A question is required to create a poll');
+	}
+
+	if (count(pollOptions, option => !isNullOrWhiteSpace(option)) < 2) {
+		throw new Error('Polls need at least two options');
+	}
+
+	// 2. Create the event
+	const event = {
+		aggregateId: uuid(),
+		type: eventTypes.POLL_CREATED,
+		payload: {
+			pollOptions: pollOptions.filter(option => !isNullOrWhiteSpace(option)),
+			pollQuestion
+		}
+	};
+
+	// 3. Commit the event
+	store
+		.append(Object.assign({}, event, {_id: String(++store.sequence)}))
+		.then(() => store.publish(event))
+		.catch(console.error);
+
+	// 4. Return the aggregateId to the client
+	return {aggregateId: event.aggregateId};
+}
+
+function voteOnPoll(store, payload) {
+	// 1. Validate payload
+	const {aggregateId, selectedOptions} = payload;
+
+	if (typeof aggregateId !== 'string' || !Array.isArray(selectedOptions)) {
+		throw new TypeError('Invalid payload');
+	}
+
+	if (count(selectedOptions) === 0) {
+		throw new Error('A selected option is required to vote');
+	}
+
+	// 2. Create the event
+	const event = {
+		aggregateId,
+		type: eventTypes.POLL_VOTED_ON,
+		payload: {selectedOptions}
+	};
+
+	// 3. Commit the event
+	store
+		.append(Object.assign({}, event, {_id: String(++store.sequence)}))
+		.then(() => store.publish(event))
+		.catch(console.error);
+
+	// 4. Return the aggregateId to the client
 	return {aggregateId};
 }
 

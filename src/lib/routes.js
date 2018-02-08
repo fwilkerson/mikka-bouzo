@@ -22,14 +22,14 @@ export default ({store}) => ({
 		const {aggregateId} = request.params;
 		send(response, 200, {aggregateId});
 	},
-	postCommand: async (request, response) => {
+	postCommand: (request, response) => {
 		if (isValidCommand(request.body)) {
 			try {
 				const {type, payload} = request.body;
-				const result = await commandHandlers[type](store, payload);
+				const result = commandHandlers[type](store, payload);
 				send(response, 202, result);
 			} catch (err) {
-				send(response, 500, {error: err});
+				send(response, 400, {error: err.message});
 			}
 		} else {
 			send(response, 400, {error: 'Invalid Command'});
