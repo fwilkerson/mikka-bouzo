@@ -21,18 +21,15 @@
 	"dependencies": {
 		"@polka/send-type": "^0.3.2",
 		"body-parser": "^1.18.2",
-		"level": "^2.1.2",
 		"polka": "^0.3.2",
+		"pouchdb-find": "^6.4.3",
+		"pouchdb-node": "^6.4.3",
 		"uuid": "^3.2.1",
 		"ws": "^4.0.0"
 	},
 	"devDependencies": {
 		"microbundle": "^0.4.3",
 		"xo": "^0.18.2"
-	},
-	"optionalDependencies": {
-		"bufferutil": "^3.0.3",
-		"utf-8-validate": "^4.0.0"
 	},
 	"xo": {
 		"prettier": true

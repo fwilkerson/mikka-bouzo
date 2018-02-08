@@ -1,17 +1,19 @@
 import send from '@polka/send-type';
-import uuid from 'uuid/v4';
 
-export default ({store, wss}) => ({
+import {commandHandlers, isValidCommand} from './commands';
+
+export default ({store}) => ({
 	getIndex: (request, response) => {
 		send(response, 200, {message: 'A three day monk'});
 	},
 	getPollById: async (request, response) => {
 		try {
 			const {aggregateId} = request.params;
-			const events = await store.get(aggregateId);
-			send(response, 200, events, {
-				'Content-Type': 'application/json; charset=utf-8'
+			const {docs} = await store.query({
+				selector: {aggregateId},
+				fields: ['aggregateId', 'type', 'payload']
 			});
+			send(response, 200, {events: docs, count: docs.length});
 		} catch (err) {
 			send(response, 500, err);
 		}
@@ -21,15 +23,16 @@ export default ({store, wss}) => ({
 		send(response, 200, {aggregateId});
 	},
 	postCommand: async (request, response) => {
-		try {
-			const command = request.body;
-			const aggregateId = uuid();
-			send(response, 202, {aggregateId});
-			const payload = JSON.stringify([command]);
-			await store.put(aggregateId, payload);
-			wss.broadcast(payload);
-		} catch (err) {
-			send(response, 500, err);
+		if (isValidCommand(request.body)) {
+			try {
+				const {type, payload} = request.body;
+				const result = await commandHandlers[type](store, payload);
+				send(response, 202, result);
+			} catch (err) {
+				send(response, 500, {error: err});
+			}
+		} else {
+			send(response, 400, {error: 'Invalid Command'});
 		}
 	}
 });
