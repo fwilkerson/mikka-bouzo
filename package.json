@@ -2,11 +2,6 @@
 	"name": "mikka-bouzo",
 	"version": "1.0.0",
 	"description": "A three day monk.",
-	"main": "dist/index.js",
-	"scripts": {
-		"build": "xo && microbundle -f cjs --external all",
-		"start": "node dist/index.js"
-	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/fwilkerson/mikka-bouzo.git"
@@ -17,25 +12,5 @@
 	"bugs": {
 		"url": "https://github.com/fwilkerson/mikka-bouzo/issues"
 	},
-	"homepage": "https://github.com/fwilkerson/mikka-bouzo#readme",
-	"dependencies": {
-		"@polka/send-type": "^0.3.2",
-		"body-parser": "^1.18.2",
-		"polka": "^0.3.2",
-		"pouchdb-adapter-http": "^6.4.3",
-		"pouchdb-adapter-memory": "^6.4.3",
-		"pouchdb-core": "^6.4.3",
-		"pouchdb-find": "^6.4.3",
-		"pouchdb-mapreduce": "^6.4.3",
-		"pouchdb-replication": "^6.4.3",
-		"uuid": "^3.2.1",
-		"ws": "^4.0.0"
-	},
-	"devDependencies": {
-		"microbundle": "^0.4.3",
-		"xo": "^0.18.2"
-	},
-	"xo": {
-		"prettier": true
-	}
+	"homepage": "https://github.com/fwilkerson/mikka-bouzo#readme"
 }
