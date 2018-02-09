@@ -1,4 +1,5 @@
-import parser from 'body-parser';
+import {json} from 'body-parser';
+import cors from 'cors';
 import polka from 'polka';
 
 import createRoutes from './lib/routes';
@@ -7,7 +8,9 @@ import createStore from './lib/store';
 (async () => {
 	const {PORT = 3000} = process.env;
 
-	const app = polka().use(parser.json());
+	const app = polka()
+		.use(cors())
+		.use(json());
 	const store = await createStore({app, location: 'event-store'});
 	const {getPollById, postCommand} = createRoutes({store});
 
