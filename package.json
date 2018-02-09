@@ -5,7 +5,7 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"build": "xo && microbundle -f cjs --external all",
-		"start": "SET NODE_ENV=production&& node dist/index.js"
+		"start": "node dist/index.js"
 	},
 	"repository": {
 		"type": "git",
@@ -22,8 +22,12 @@
 		"@polka/send-type": "^0.3.2",
 		"body-parser": "^1.18.2",
 		"polka": "^0.3.2",
+		"pouchdb-adapter-http": "^6.4.3",
+		"pouchdb-adapter-memory": "^6.4.3",
+		"pouchdb-core": "^6.4.3",
 		"pouchdb-find": "^6.4.3",
-		"pouchdb-node": "^6.4.3",
+		"pouchdb-mapreduce": "^6.4.3",
+		"pouchdb-replication": "^6.4.3",
 		"uuid": "^3.2.1",
 		"ws": "^4.0.0"
 	},

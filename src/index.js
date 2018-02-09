@@ -5,19 +5,17 @@ import createRoutes from './lib/routes';
 import createStore from './lib/store';
 
 (async () => {
-	const {PORT = 3000, HOST = '::'} = process.env;
+	const {PORT = 3000} = process.env;
 
 	const app = polka().use(parser.json());
-	const store = await createStore({app, location: './dist/event-store'});
-	const routes = createRoutes({store});
+	const store = await createStore({app, location: 'event-store'});
+	const {getPollById, postCommand} = createRoutes({store});
 
 	app
-		.get('/', routes.getIndex)
-		.get('/api/poll/:aggregateId', routes.getPollById)
-		.get('/api/poll/:aggregateId/results', routes.getPollResultsById)
-		.post('/api/command', routes.postCommand);
+		.get('/api/poll/:aggregateId', getPollById)
+		.post('/api/command', postCommand);
 
-	await app.listen(PORT, HOST);
+	await app.listen(PORT);
 
 	console.log(`> Running on port ${PORT}`);
 

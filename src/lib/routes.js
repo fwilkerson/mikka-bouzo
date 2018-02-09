@@ -3,9 +3,6 @@ import send from '@polka/send-type';
 import {commandHandlers, isValidCommand} from './commands';
 
 export default ({store}) => ({
-	getIndex: (request, response) => {
-		send(response, 200, {message: 'A three day monk'});
-	},
 	getPollById: async (request, response) => {
 		try {
 			const {aggregateId} = request.params;
@@ -17,10 +14,6 @@ export default ({store}) => ({
 		} catch (err) {
 			send(response, 500, err);
 		}
-	},
-	getPollResultsById: (request, response) => {
-		const {aggregateId} = request.params;
-		send(response, 200, {aggregateId});
 	},
 	postCommand: (request, response) => {
 		if (isValidCommand(request.body)) {
