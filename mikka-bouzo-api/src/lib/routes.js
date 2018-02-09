@@ -20,7 +20,13 @@ export default ({store}) => ({
 			try {
 				const {type, payload} = request.body;
 				const result = commandHandlers[type](store, payload);
-				send(response, 202, result);
+				if (typeof result.then === 'function') {
+					result
+						.then(event => send(response, 201, event))
+						.catch(err => send(response, 500, {error: err.message}));
+				} else {
+					send(response, 202, result);
+				}
 			} catch (err) {
 				send(response, 400, {error: err.message});
 			}

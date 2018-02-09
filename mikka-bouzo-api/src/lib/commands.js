@@ -34,7 +34,7 @@ function isNullOrWhiteSpace(str) {
 	return str === null || str === undefined || str.trim() === '';
 }
 
-function createPoll(store, payload) {
+async function createPoll(store, payload) {
 	// 1. Validate payload
 	const {pollOptions, pollQuestion} = payload;
 
@@ -61,13 +61,10 @@ function createPoll(store, payload) {
 	};
 
 	// 3. Commit the event
-	store
-		.append(Object.assign({}, event, {_id: String(++store.sequence)}))
-		.then(() => store.publish(event))
-		.catch(console.error);
+	await store.append(Object.assign({}, event, {_id: String(++store.sequence)}));
 
 	// 4. Return the aggregateId to the client
-	return {aggregateId: event.aggregateId};
+	return event;
 }
 
 function voteOnPoll(store, payload) {

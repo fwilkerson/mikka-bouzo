@@ -28,6 +28,7 @@
     "preact-compat": "^3.18.0",
     "preact-router": "^2.6.0",
     "skeleton-css": "^2.0.4",
+    "sockette": "^1.2.0",
     "stockroom": "^1.0.1",
     "unistore": "^3.0.4"
   }
