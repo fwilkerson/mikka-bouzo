@@ -12,16 +12,25 @@ class PollResults extends Component {
 		totalVotes: 0
 	};
 
+	componentDidMount() {
+		if (this.props.aggregateId !== this.props.id) {
+			this.props.getPollById(this.props.id);
+		}
+	}
+
 	render(props, state) {
-		console.log(props);
+		console.log(props, state);
 		return (
 			<section class="container">
 				<h3>{props.pollQuestion}</h3>
-				{Object.values(props.pollResults).map(answer => {
-					const percent = getPercentage(answer.numberOfVotes, props.totalVotes);
+				{Object.keys(props.pollResults).map(key => {
+					const percent = getPercentage(
+						props.pollResults[key],
+						props.totalVotes
+					);
 					return (
 						<div class="progress-bar horizontal rounded">
-							<em>{answer.value}</em>
+							<em>{key}</em>
 							<div class="progress-track">
 								<div class="progress-fill" style={{width: percent}}>
 									<span>{percent}</span>
@@ -38,4 +47,6 @@ class PollResults extends Component {
 	}
 }
 
-export default connect('pollQuestion,pollResults,totalVotes')(PollResults);
+export default connect('aggregateId,pollQuestion,pollResults,totalVotes', {
+	getPollById: 'getPollById'
+})(PollResults);

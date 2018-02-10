@@ -7,6 +7,7 @@ import {Provider} from 'unistore/preact';
 
 import CreatePoll from 'async!./routes/create-poll';
 import PollResults from 'async!./routes/poll-results';
+import PollVote from 'async!./routes/poll-vote';
 
 if (module.hot) {
 	require('preact/debug');
@@ -33,6 +34,7 @@ export default () => (
 			<Router onChange={this.handleRoute}>
 				<CreatePoll path="/" />
 				<PollResults path="/poll/:id/results" />
+				<PollVote path="/poll/:id/vote" />
 			</Router>
 		</div>
 	</Provider>

@@ -27,18 +27,15 @@ class CreatePoll extends Component {
 	};
 
 	createPoll = _ => {
-		try {
-			const {props, state} = this;
-			props.createPoll(state);
-			// navigate to poll results for given id
-		} catch (err) {
-			// TODO: Display error to user
-			console.error('main thread catch hit: ', err);
-		}
+		const {props, state} = this;
+		props.createPoll(state);
 	};
 
 	componentWillReceiveProps(nextProps) {
-		if (this.props.aggregateId === null && nextProps.aggregateId) {
+		if (
+			this.props.aggregateId !== nextProps.aggregateId &&
+			nextProps.aggregateId
+		) {
 			route(`/poll/${nextProps.aggregateId}/results`);
 		}
 	}
@@ -85,6 +82,6 @@ class CreatePoll extends Component {
 	}
 }
 
-export default connect('saving,aggregateId', {
+export default connect('busy,aggregateId', {
 	createPoll: 'createPoll'
 })(CreatePoll);

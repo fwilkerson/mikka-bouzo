@@ -1,10 +1,13 @@
 import createStore from 'stockroom/worker';
 import sockette from 'sockette';
 
+const API_URL = 'https://mikka-bouzo-api-dwlwamwavz.now.sh/api';
+const waiting = {};
 let store = createStore({
-	saving: false,
+	busy: false,
 	aggregateId: null,
 	pollQuestion: '',
+	pollOptions: [],
 	pollResults: {},
 	totalVotes: 0
 });
@@ -12,13 +15,58 @@ let store = createStore({
 store.registerActions(store => ({
 	createPoll(state, payload) {
 		postCommand({type: 'CREATE_POLL', payload})
+			.then(event => {
+				store.setState({busy: false, ...handleEvent(store.getState(), event)});
+			})
+			.catch(_ => store.setState({busy: false}));
+		return {busy: true};
+	},
+	getPollById(state, id) {
+		get(`/poll/${id}`)
+			.then(({events}) => {
+				store.setState(events.reduce(handleEvent, store.getState()));
+			})
+			.catch(_ => store.setState({busy: false}));
+		return {busy: true};
+	},
+	submitVote(state, payload) {
+		postCommand({type: 'VOTE_ON_POLL', payload}, true)
 			.then(console.log)
-			.catch(console.error);
-		return {saving: true};
+			.catch(_ => store.setState({busy: false}));
+		return {busy: true};
 	}
 }));
 
-const waiting = {};
+const eventHandlers = {
+	POLL_CREATED: (state, event) => {
+		const {aggregateId, payload: {pollQuestion, pollOptions}} = event;
+		const pollResults = {};
+		pollOptions.forEach(option => {
+			pollResults[option] = 0;
+		});
+		return {...state, aggregateId, pollResults, pollQuestion, pollOptions};
+	},
+	POLL_VOTED_ON: (state, event) => {
+		const {pollResults, totalVotes} = state;
+		const {payload} = event;
+		const updates = {};
+		payload.selectedOptions.forEach(option => {
+			updates[option] = pollResults[option] + 1;
+		});
+		return {
+			...state,
+			pollResults: {...pollResults, ...updates},
+			totalVotes: totalVotes + 1
+		};
+	}
+};
+
+function handleEvent(state, event) {
+	return eventHandlers[event.type]
+		? eventHandlers[event.type](state, event)
+		: state;
+}
+
 const ws = sockette('wss://mikka-bouzo-api-dwlwamwavz.now.sh/ws', {
 	timeout: 5e3,
 	maxAttempts: 3,
@@ -39,17 +87,17 @@ function isWaiting(data) {
 	return false;
 }
 
-function onReceive(event) {
-	const {type, payload} = JSON.parse(event.data);
+function onReceive(message) {
+	const event = JSON.parse(message.data);
 
 	// the dataService is expecting and has handled the ws message
-	if (isWaiting(payload)) {
+	if (isWaiting(event)) {
 		return;
 	}
 
-	switch (type) {
+	switch (event.type) {
 		default:
-			console.info(type, payload);
+			console.info(event);
 			break;
 	}
 }
@@ -84,34 +132,30 @@ function leaveChannel(channel) {
 	}
 }
 
-function get(route) {
-	return fetch(route)
-		.then(response => response.json())
-		.catch(console.error);
+async function get(route) {
+	const response = await fetch(API_URL + route);
+	return await response.json();
 }
 
-function postCommand(command, eventually = false) {
+async function postCommand(command, wait = false) {
 	const options = {
 		method: 'POST',
 		headers: {'Content-Type': 'application/json'},
 		body: JSON.stringify(command)
 	};
-	return fetch('https://mikka-bouzo-api-dwlwamwavz.now.sh/api/command', options)
-		.then(response => response.json())
-		.then(data => {
-			if (data.error) {
-				Promise.reject(data.error);
-			} else {
-				// tell the server to subscribe us to messages for this aggregate
-				joinChannel(data.aggregateId);
-				if (eventually) {
-					return eventually(data.aggregateId);
-				} else {
-					return data;
-				}
-			}
-		})
-		.catch(console.error);
+	const response = await fetch(API_URL + '/command', options);
+	const data = await response.json();
+	if (data.error) {
+		return data.error;
+	}
+	// tell the server to subscribe us to messages for this aggregate
+	joinChannel(data.aggregateId);
+
+	if (wait) {
+		return eventually(data.aggregateId);
+	} else {
+		return data;
+	}
 }
 
 export default store;
