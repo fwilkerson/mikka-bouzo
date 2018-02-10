@@ -56,8 +56,6 @@ export default function createRoutes({store}) {
 				connections[aggregateId] = [];
 			}
 			connections[aggregateId].push(response);
-			const data = JSON.stringify({type: 'SUBSCRIBED', aggregateId});
-			response.write(`data: ${data}\n\n`);
 		}
 	};
 }

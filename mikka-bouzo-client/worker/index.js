@@ -1,6 +1,7 @@
 import createStore from 'stockroom/worker';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://mikka-bouzo-api-srmlnqfwki.now.sh/api';
+// const API_URL = 'http://localhost:3000/api';
 
 let store = createStore({
 	busy: false,
@@ -73,29 +74,27 @@ function createEventSource(aggregateId) {
 
 	eventSource.onerror = console.error;
 	eventSource.onmessage = message => {
-		const event = JSON.parse(message.data);
-		store.setState(handleEvent(store.getState(), event));
+		try {
+			const event = JSON.parse(message.data);
+			store.setState(handleEvent(store.getState(), event));
+		} catch (err) {
+			console.error(err);
+		}
 	};
 	eventSource.onopen = console.info;
 }
 
-async function get(route) {
-	const response = await fetch(API_URL + route);
-	return await response.json();
+function get(route) {
+	return fetch(API_URL + route).then(response => response.json());
 }
 
-async function postCommand(command, wait = false) {
+function postCommand(command) {
 	const options = {
 		method: 'POST',
 		headers: {'Content-Type': 'application/json'},
 		body: JSON.stringify(command)
 	};
-	const response = await fetch(API_URL + '/command', options);
-	const data = await response.json();
-	if (data.error) {
-		return data.error;
-	}
-	return data;
+	return fetch(API_URL + '/command', options).then(response => response.json());
 }
 
 export default store;
