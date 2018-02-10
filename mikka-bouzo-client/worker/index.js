@@ -1,7 +1,10 @@
 import createStore from 'stockroom/worker';
+import sockette from 'sockette';
 
-const API_URL = 'https://mikka-bouzo-api-srmlnqfwki.now.sh/api';
-// const API_URL = 'http://localhost:3000/api';
+// const API_URL = 'https://mikka-bouzo-api-hyjrtsmgdm.now.sh/api';
+// const WS_URL = 'wss://mikka-bouzo-api-hyjrtsmgdm.now.sh/web-socket';
+const API_URL = 'http://localhost:3000/api';
+const WS_URL = 'ws://localhost:3000/web-socket';
 
 let store = createStore({
 	busy: false,
@@ -16,7 +19,6 @@ store.registerActions(store => ({
 	createPoll(state, payload) {
 		postCommand({type: 'CREATE_POLL', payload})
 			.then(event => {
-				createEventSource(event.aggregateId);
 				store.setState({busy: false, ...handleEvent(store.getState(), event)});
 			})
 			.catch(_ => store.setState({busy: false}));
@@ -28,7 +30,6 @@ store.registerActions(store => ({
 				store.setState(events.reduce(handleEvent, store.getState()));
 			})
 			.catch(_ => store.setState({busy: false}));
-		createEventSource(id);
 		return {busy: true};
 	},
 	submitVote(state, payload) {
@@ -69,19 +70,27 @@ function handleEvent(state, event) {
 		: state;
 }
 
-function createEventSource(aggregateId) {
-	const eventSource = new EventSource(`${API_URL}/subscribe/${aggregateId}`);
-
-	eventSource.onerror = console.error;
-	eventSource.onmessage = message => {
-		try {
-			const event = JSON.parse(message.data);
-			store.setState(handleEvent(store.getState(), event));
-		} catch (err) {
-			console.error(err);
-		}
-	};
-	eventSource.onopen = console.info;
+if (PRERENDER) {
+} else {
+	const webSocket = sockette(WS_URL, {
+		timeout: 5e3,
+		maxAttempts: 3,
+		onopen: console.info,
+		onmessage: message => {
+			try {
+				const event = JSON.parse(message.data);
+				const state = store.getState();
+				if (event.aggregateId === state.aggregateId) {
+					store.setState(handleEvent(state, event));
+				}
+			} catch (err) {
+				console.error(err);
+			}
+		},
+		onreconnect: console.info,
+		onclose: console.info,
+		onerror: console.error
+	});
 }
 
 function get(route) {

@@ -2,18 +2,7 @@ import send from '@polka/send-type';
 
 import {commandHandlers, isValidCommand} from './commands';
 
-const connections = {};
-
-function publish(event) {
-	const {aggregateId} = event;
-	const data = JSON.stringify(event);
-	connections[aggregateId].forEach(response => {
-		response.write(`data: ${data}\n\n`);
-	});
-}
-
 export default function createRoutes({store}) {
-	store.publish = publish;
 	return {
 		getPollById: async (request, response) => {
 			try {
@@ -44,18 +33,6 @@ export default function createRoutes({store}) {
 			} catch (err) {
 				send(response, 400, {error: err.message});
 			}
-		},
-		subscribe: (request, response) => {
-			response.writeHead(200, {
-				'Content-Type': 'text/event-stream',
-				'Cache-Control': 'no-cache',
-				Connection: 'keep-alive'
-			});
-			const {aggregateId} = request.params;
-			if (!Array.isArray(connections[aggregateId])) {
-				connections[aggregateId] = [];
-			}
-			connections[aggregateId].push(response);
 		}
 	};
 }

@@ -1,4 +1,4 @@
-import uuid from 'uuid/v4';
+import cuid from 'cuid';
 
 export const commandTypes = {
 	CREATE_POLL: 'CREATE_POLL',
@@ -52,7 +52,7 @@ async function createPoll(store, payload) {
 
 	// 2. Create the event
 	const event = {
-		aggregateId: uuid(),
+		aggregateId: cuid(),
 		type: eventTypes.POLL_CREATED,
 		payload: {
 			pollOptions: pollOptions.filter(option => !isNullOrWhiteSpace(option)),
@@ -61,7 +61,7 @@ async function createPoll(store, payload) {
 	};
 
 	// 3. Commit the event
-	await store.append(Object.assign({}, event, {_id: String(++store.sequence)}));
+	await store.append(Object.assign({}, event, {_id: event.aggregateId}));
 
 	// 4. Return the aggregateId to the client
 	return event;
@@ -79,6 +79,8 @@ function voteOnPoll(store, payload) {
 		throw new Error('A selected option is required to vote');
 	}
 
+	// Check if aggregate exists?
+
 	// 2. Create the event
 	const event = {
 		aggregateId,
@@ -88,7 +90,7 @@ function voteOnPoll(store, payload) {
 
 	// 3. Commit the event
 	store
-		.append(Object.assign({}, event, {_id: String(++store.sequence)}))
+		.append(Object.assign({}, event, {_id: cuid()}))
 		.then(() => store.publish(event))
 		.catch(console.error);
 
