@@ -13,13 +13,10 @@ if (module.hot) {
 	require('preact/debug');
 }
 
-// let store = createStore(new StoreWorker());
-
 let store;
 
 const interopRequire = m => m.default || m;
 
-// This is an example of skipping the Worker entirely during SSR/Prerendering:
 if (PRERENDER) {
 	let createStore = interopRequire(require('stockroom/inline'));
 	store = createStore(interopRequire(require('./worker')));

@@ -7,16 +7,15 @@ import createStore from './lib/store';
 
 (async () => {
 	const {PORT = 3000} = process.env;
+	const store = await createStore({location: 'event-store'});
+	const {getPollById, postCommand, subscribe} = createRoutes({store});
 
 	const app = polka()
 		.use(cors())
-		.use(json());
-	const store = await createStore({app, location: 'event-store'});
-	const {getPollById, postCommand} = createRoutes({store});
-
-	app
+		.use(json())
 		.get('/api/poll/:aggregateId', getPollById)
-		.post('/api/command', postCommand);
+		.post('/api/command', postCommand)
+		.get('/api/subscribe/:aggregateId', subscribe);
 
 	await app.listen(PORT);
 

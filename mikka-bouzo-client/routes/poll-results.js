@@ -19,7 +19,6 @@ class PollResults extends Component {
 	}
 
 	render(props, state) {
-		console.log(props, state);
 		return (
 			<section class="container">
 				<h3>{props.pollQuestion}</h3>
