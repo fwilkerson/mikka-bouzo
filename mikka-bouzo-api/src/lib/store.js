@@ -18,6 +18,14 @@ export default async ({app, location}) => {
 	const wss = new WebSocket.Server({server: app.server, path: '/web-socket'});
 
 	wss.on('connection', ws => {
+		ws.on('message', message => {
+			const event = JSON.parse(message);
+			if (event.type === 'SUBSCRIBE') {
+				ws.aggregateId = event.aggregateId;
+			} else {
+				console.info(event);
+			}
+		});
 		ws.on('error', () => {});
 	});
 
@@ -31,7 +39,10 @@ export default async ({app, location}) => {
 		publish(event) {
 			const message = JSON.stringify(event);
 			wss.clients.forEach(client => {
-				if (client.readyState === WebSocket.OPEN) {
+				if (
+					client.aggregateId === event.aggregateId &&
+					client.readyState === WebSocket.OPEN
+				) {
 					client.send(message);
 				}
 			});

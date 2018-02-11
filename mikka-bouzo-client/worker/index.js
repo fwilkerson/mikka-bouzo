@@ -5,7 +5,9 @@ import sockette from 'sockette';
 // const WS_URL = 'wss://mikka-bouzo-api-hyjrtsmgdm.now.sh/web-socket';
 const API_URL = 'http://localhost:3000/api';
 const WS_URL = 'ws://localhost:3000/web-socket';
+const eventQueue = [];
 
+let webSocket;
 let store = createStore({
 	busy: false,
 	aggregateId: null,
@@ -19,12 +21,14 @@ store.registerActions(store => ({
 	createPoll(state, payload) {
 		postCommand({type: 'CREATE_POLL', payload})
 			.then(event => {
+				queueEvent({type: 'SUBSCRIBE', aggregateId: event.aggregateId});
 				store.setState({busy: false, ...handleEvent(store.getState(), event)});
 			})
 			.catch(_ => store.setState({busy: false}));
 		return {busy: true};
 	},
 	getPollById(state, id) {
+		queueEvent({type: 'SUBSCRIBE', aggregateId: id});
 		get(`/poll/${id}`)
 			.then(({events}) => {
 				store.setState(events.reduce(handleEvent, store.getState()));
@@ -72,10 +76,15 @@ function handleEvent(state, event) {
 
 if (PRERENDER) {
 } else {
-	const webSocket = sockette(WS_URL, {
+	webSocket = sockette(WS_URL, {
 		timeout: 5e3,
 		maxAttempts: 3,
-		onopen: console.info,
+		onopen: _ => {
+			while (eventQueue.length) {
+				let event = eventQueue.shift();
+				webSocket.send(JSON.stringify(event));
+			}
+		},
 		onmessage: message => {
 			try {
 				const event = JSON.parse(message.data);
@@ -91,6 +100,14 @@ if (PRERENDER) {
 		onclose: console.info,
 		onerror: console.error
 	});
+}
+
+function queueEvent(event) {
+	if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+		webSocket.send(JSON.stringify(event));
+	} else {
+		eventQueue.push(event);
+	}
 }
 
 function get(route) {

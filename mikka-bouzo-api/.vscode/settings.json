@@ -1,4 +1,6 @@
 {
 	"editor.formatOnSave": true,
-	"xo.enable": true,
+	"editor.tabSize": 2,
+	"files.eol": "\n",
+	"xo.enable": true
 }

@@ -36,7 +36,7 @@ class CreatePoll extends Component {
 			this.props.aggregateId !== nextProps.aggregateId &&
 			nextProps.aggregateId
 		) {
-			route(`/poll/${nextProps.aggregateId}/results`);
+			route(`/poll/${nextProps.aggregateId}/vote`);
 		}
 	}
 
