@@ -2,8 +2,8 @@ import {json} from 'body-parser';
 import cors from 'cors';
 import polka from 'polka';
 
-import createRoutes from './lib/routes';
-import createStore from './lib/store';
+import createRoutes from './routes';
+import createStore from './store';
 
 (async () => {
 	const {PORT = 3000} = process.env;
