@@ -1,5 +1,4 @@
 export default (config, env, helpers) => {
-	// Add a PRERENDER global:
 	helpers.getPluginsByName(
 		config,
 		'DefinePlugin'
