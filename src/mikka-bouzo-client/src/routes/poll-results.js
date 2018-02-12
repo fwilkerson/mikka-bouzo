@@ -1,9 +1,8 @@
 import {h, Component} from 'preact';
 import {connect} from 'unistore/preact';
 
-const getPercentage = (numberOfVotes, totalVotes) => {
-	return (numberOfVotes / totalVotes * 100).toFixed(0) + '%';
-};
+const getPercentage = (numberOfVotes, totalVotes) =>
+	(numberOfVotes / totalVotes * 100).toFixed(0) + '%';
 
 class PollResults extends Component {
 	static defaultProps = {
@@ -18,7 +17,7 @@ class PollResults extends Component {
 		}
 	}
 
-	render(props, state) {
+	render(props) {
 		return (
 			<section class="container">
 				<h3>{props.pollQuestion}</h3>

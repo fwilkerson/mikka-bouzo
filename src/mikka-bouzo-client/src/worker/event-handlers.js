@@ -22,7 +22,7 @@ const eventHandlers = {
 	}
 };
 
-export function handleEvent(state, event) {
+export default function handleEvent(state, event) {
 	return eventHandlers[event.type]
 		? eventHandlers[event.type](state, event)
 		: state;

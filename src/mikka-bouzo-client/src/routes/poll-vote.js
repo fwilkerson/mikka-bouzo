@@ -16,7 +16,7 @@ class PollVote extends Component {
 	togglePollOptionSelected = option => _ => {
 		const {props, state: {selectedOptions}} = this;
 		const updates = {};
-		updates[option] = selectedOptions[option] ? false : true;
+		updates[option] = !selectedOptions[option];
 		this.setState({
 			selectedOptions: props.multiSelect
 				? {...selectedOptions, ...updates}
@@ -28,9 +28,10 @@ class PollVote extends Component {
 		const {props, state: {selectedOptions}} = this;
 		props.submitVote({
 			aggregateId: props.id,
-			selectedOptions: Object.keys(selectedOptions).reduce((acc, key) => {
-				return acc.concat(selectedOptions[key] ? key : []);
-			}, [])
+			selectedOptions: Object.keys(selectedOptions).reduce(
+				(acc, key) => acc.concat(selectedOptions[key] ? key : []),
+				[]
+			)
 		});
 	};
 
