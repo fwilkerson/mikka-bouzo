@@ -22,11 +22,11 @@ class CreatePoll extends Component {
 		});
 	};
 
-	addNewPollOption = _ => {
+	addNewPollOption = () => {
 		this.setState({pollOptions: this.state.pollOptions.concat('')});
 	};
 
-	createPoll = _ => {
+	createPoll = () => {
 		const {props, state} = this;
 		props.createPoll(state);
 	};

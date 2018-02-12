@@ -2,7 +2,7 @@ import createStore from 'stockroom/worker';
 import sockette from 'sockette';
 
 import {get, postCommand} from './data-service';
-import handleEvent from './event-handlers';
+import {handleEvent} from './event-handlers';
 
 const WS_URL = 'wss://mikka-bouzo-api-tzdctwfrkk.now.sh/web-socket';
 const messageQueue = [];
@@ -22,10 +22,7 @@ store.registerActions(store => ({
 		postCommand({type: 'CREATE_POLL', payload})
 			.then(event => {
 				queueMessage({type: 'SUBSCRIBE', aggregateId: event.aggregateId});
-				store.setState({
-					busy: false,
-					...handleEvent(store.getState(), event)
-				});
+				store.setState({busy: false, ...handleEvent(store.getState(), event)});
 			})
 			.catch(() => store.setState({busy: false}));
 		return {busy: true};

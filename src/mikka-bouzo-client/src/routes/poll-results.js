@@ -1,8 +1,9 @@
 import {h, Component} from 'preact';
 import {connect} from 'unistore/preact';
 
-const getPercentage = (numberOfVotes, totalVotes) =>
-	(numberOfVotes / totalVotes * 100).toFixed(0) + '%';
+function getPercentage(numberOfVotes, totalVotes) {
+	return (numberOfVotes / totalVotes * 100).toFixed(0) + '%';
+}
 
 class PollResults extends Component {
 	static defaultProps = {

@@ -13,7 +13,7 @@ class PollVote extends Component {
 		selectedOptions: {}
 	};
 
-	togglePollOptionSelected = option => _ => {
+	togglePollOptionSelected = option => () => {
 		const {props, state: {selectedOptions}} = this;
 		const updates = {};
 		updates[option] = !selectedOptions[option];
@@ -24,18 +24,17 @@ class PollVote extends Component {
 		});
 	};
 
-	submitVote = _ => {
+	submitVote = () => {
 		const {props, state: {selectedOptions}} = this;
 		props.submitVote({
 			aggregateId: props.id,
-			selectedOptions: Object.keys(selectedOptions).reduce(
-				(acc, key) => acc.concat(selectedOptions[key] ? key : []),
-				[]
-			)
+			selectedOptions: Object.keys(selectedOptions).reduce((acc, key) => {
+				return acc.concat(selectedOptions[key] ? key : []);
+			}, [])
 		});
 	};
 
-	viewResults = _ => {
+	viewResults = () => {
 		route(`/poll/${this.props.id}/results`);
 	};
 
