@@ -6,32 +6,35 @@ import replication from 'pouchdb-replication';
 import find from 'pouchdb-find';
 import WebSocket from 'ws';
 
+import {socketMessages} from './constants';
+
 PouchDB.plugin(PouchMemory)
 	.plugin(HttpPouch)
 	.plugin(mapreduce)
 	.plugin(replication)
 	.plugin(find);
 
-export default async ({app, location}) => {
-	const store = new PouchDB(location);
+export default async ({server}) => {
+	const store = new PouchDB('event-store');
 	await store.createIndex({index: {fields: ['aggregateId']}});
-	const wss = new WebSocket.Server({server: app.server, path: '/web-socket'});
+	const wss = new WebSocket.Server({server, path: '/web-socket'});
 
-	wss.on('connection', ws => {
-		ws.on('message', message => {
+	wss.on('connection', client => {
+		client.on('message', message => {
 			const event = JSON.parse(message);
-			if (event.type === 'SUBSCRIBE') {
-				ws.aggregateId = event.aggregateId;
-			} else {
-				console.info(event);
+			if (event.type === socketMessages.SUBSCRIBE) {
+				client.aggregateId = event.aggregateId;
 			}
 		});
-		ws.on('error', () => {});
+		client.on('error', () => {});
 	});
 
 	return {
 		append(event) {
 			return store.put(event);
+		},
+		getById(id) {
+			return store.get(id);
 		},
 		query(options) {
 			return store.find(options);

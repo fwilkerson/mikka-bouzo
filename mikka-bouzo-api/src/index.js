@@ -10,7 +10,7 @@ import createStore from './lib/store';
 	const app = polka()
 		.use(cors())
 		.use(json());
-	const store = await createStore({app, location: 'event-store'});
+	const store = await createStore({server: app.server});
 	const {getPollById, postCommand} = createRoutes({store});
 
 	app
