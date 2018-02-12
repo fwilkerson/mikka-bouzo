@@ -1,5 +1,5 @@
 {
-	"name": "mikka-bouzo-api",
+	"name": "mikka-bouzo-poll-api",
 	"version": "1.0.0",
 	"description": "A three day monk.",
 	"main": "dist/index.js",

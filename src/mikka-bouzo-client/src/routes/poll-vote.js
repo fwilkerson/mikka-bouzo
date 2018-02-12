@@ -13,10 +13,10 @@ class PollVote extends Component {
 		selectedOptions: {}
 	};
 
-	togglePollOptionSelected = option => _ => {
+	togglePollOptionSelected = option => () => {
 		const {props, state: {selectedOptions}} = this;
 		const updates = {};
-		updates[option] = selectedOptions[option] ? false : true;
+		updates[option] = !selectedOptions[option];
 		this.setState({
 			selectedOptions: props.multiSelect
 				? {...selectedOptions, ...updates}
@@ -24,7 +24,7 @@ class PollVote extends Component {
 		});
 	};
 
-	submitVote = _ => {
+	submitVote = () => {
 		const {props, state: {selectedOptions}} = this;
 		props.submitVote({
 			aggregateId: props.id,
@@ -34,7 +34,7 @@ class PollVote extends Component {
 		});
 	};
 
-	viewResults = _ => {
+	viewResults = () => {
 		route(`/poll/${this.props.id}/results`);
 	};
 
