@@ -1,11 +1,12 @@
 import createStore from 'stockroom/worker';
 import sockette from 'sockette';
 
-// const API_URL = 'https://mikka-bouzo-api-hyjrtsmgdm.now.sh/api';
-// const WS_URL = 'wss://mikka-bouzo-api-hyjrtsmgdm.now.sh/web-socket';
-const API_URL = 'http://localhost:3000/api';
-const WS_URL = 'ws://localhost:3000/web-socket';
-const eventQueue = [];
+import {get, postCommand} from './data-service';
+import {handleEvent} from './event-handlers';
+
+const WS_URL = 'wss://mikka-bouzo-api-tzdctwfrkk.now.sh/web-socket';
+// const WS_URL = 'ws://localhost:3000/web-socket';
+const messageQueue = [];
 
 let webSocket;
 let store = createStore({
@@ -21,14 +22,14 @@ store.registerActions(store => ({
 	createPoll(state, payload) {
 		postCommand({type: 'CREATE_POLL', payload})
 			.then(event => {
-				queueEvent({type: 'SUBSCRIBE', aggregateId: event.aggregateId});
+				queueMessage({type: 'SUBSCRIBE', aggregateId: event.aggregateId});
 				store.setState({busy: false, ...handleEvent(store.getState(), event)});
 			})
 			.catch(_ => store.setState({busy: false}));
 		return {busy: true};
 	},
 	getPollById(state, id) {
-		queueEvent({type: 'SUBSCRIBE', aggregateId: id});
+		queueMessage({type: 'SUBSCRIBE', aggregateId: id});
 		get(`/poll/${id}`)
 			.then(({events}) => {
 				store.setState(events.reduce(handleEvent, store.getState()));
@@ -44,45 +45,14 @@ store.registerActions(store => ({
 	}
 }));
 
-const eventHandlers = {
-	POLL_CREATED: (state, event) => {
-		const {aggregateId, payload: {pollQuestion, pollOptions}} = event;
-		const pollResults = {};
-		pollOptions.forEach(option => {
-			pollResults[option] = 0;
-		});
-		return {...state, aggregateId, pollResults, pollQuestion, pollOptions};
-	},
-	POLL_VOTED_ON: (state, event) => {
-		const {pollResults, totalVotes} = state;
-		const {payload} = event;
-		const updates = {};
-		payload.selectedOptions.forEach(option => {
-			updates[option] = pollResults[option] + 1;
-		});
-		return {
-			...state,
-			pollResults: {...pollResults, ...updates},
-			totalVotes: totalVotes + 1
-		};
-	}
-};
-
-function handleEvent(state, event) {
-	return eventHandlers[event.type]
-		? eventHandlers[event.type](state, event)
-		: state;
-}
-
-if (PRERENDER) {
-} else {
+if (!PRERENDER) {
 	webSocket = sockette(WS_URL, {
 		timeout: 5e3,
 		maxAttempts: 3,
 		onopen: _ => {
-			while (eventQueue.length) {
-				let event = eventQueue.shift();
-				webSocket.send(JSON.stringify(event));
+			while (messageQueue.length) {
+				const message = messageQueue.shift();
+				webSocket.send(message);
 			}
 		},
 		onmessage: message => {
@@ -102,25 +72,12 @@ if (PRERENDER) {
 	});
 }
 
-function queueEvent(event) {
+function queueMessage(message) {
 	if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-		webSocket.send(JSON.stringify(event));
+		webSocket.send(JSON.stringify(message));
 	} else {
-		eventQueue.push(event);
+		messageQueue.push(JSON.stringify(message));
 	}
-}
-
-function get(route) {
-	return fetch(API_URL + route).then(response => response.json());
-}
-
-function postCommand(command) {
-	const options = {
-		method: 'POST',
-		headers: {'Content-Type': 'application/json'},
-		body: JSON.stringify(command)
-	};
-	return fetch(API_URL + '/command', options).then(response => response.json());
 }
 
 export default store;
