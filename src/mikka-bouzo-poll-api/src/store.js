@@ -6,7 +6,7 @@ import replication from 'pouchdb-replication';
 import find from 'pouchdb-find';
 import WebSocket from 'ws';
 
-import {socketMessages} from './constants';
+import {socketMessages} from '../../mikka-bouzo-common/constants';
 
 PouchDB.plugin(PouchMemory)
 	.plugin(HttpPouch)

@@ -1,5 +1,7 @@
+import {eventTypes} from '../../../mikka-bouzo-common/constants';
+
 const eventHandlers = {
-	POLL_CREATED: (state, event) => {
+	[eventTypes.POLL_CREATED]: (state, event) => {
 		const {aggregateId, payload: {pollQuestion, pollOptions}} = event;
 		const pollResults = {};
 		pollOptions.forEach(option => {
@@ -7,7 +9,7 @@ const eventHandlers = {
 		});
 		return {...state, aggregateId, pollResults, pollQuestion, pollOptions};
 	},
-	POLL_VOTED_ON: (state, event) => {
+	[eventTypes.POLL_VOTED_ON]: (state, event) => {
 		const {pollResults, totalVotes} = state;
 		const {payload} = event;
 		const updates = {};
