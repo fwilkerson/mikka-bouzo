@@ -1,11 +1,11 @@
 import createStore from 'stockroom/worker';
-import sockette from 'sockette';
+import Sockette from 'sockette';
 
 import {get, postCommand} from './data-service';
 import {handleEvent} from './event-handlers';
-import {commandTypes, socketMessages} from '../../../mikka-bouzo-common/constants';
+import {commandTypes, socketMessages} from '../constants';
 
-const WS_URL = 'wss://mikka-bouzo-api-tzdctwfrkk.now.sh/web-socket';
+const WS_URL = 'wss://mikka-bouzo-poll-api-ckmhebiznl.now.sh/web-socket';
 const messageQueue = [];
 
 let webSocket;
@@ -49,13 +49,13 @@ store.registerActions(store => ({
 }));
 
 if (!PRERENDER) {
-	webSocket = sockette(WS_URL, {
+	webSocket = new Sockette(WS_URL, {
 		timeout: 5e3,
 		maxAttempts: 3,
 		onopen: () => {
 			while (messageQueue.length) {
 				const message = messageQueue.shift();
-				webSocket.send(message);
+				webSocket.json(message);
 			}
 		},
 		onmessage: message => {
@@ -71,15 +71,16 @@ if (!PRERENDER) {
 		},
 		onreconnect: console.info,
 		onclose: console.info,
-		onerror: console.error
+		onerror: console.error,
+		onmaximum: console.info
 	});
 }
 
 function queueMessage(message) {
 	if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-		webSocket.send(JSON.stringify(message));
+		webSocket.json(message);
 	} else {
-		messageQueue.push(JSON.stringify(message));
+		messageQueue.push(message);
 	}
 }
 

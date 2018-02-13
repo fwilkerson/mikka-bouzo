@@ -1,4 +1,4 @@
-const API_URL = 'https://mikka-bouzo-api-tzdctwfrkk.now.sh/api';
+const API_URL = 'https://mikka-bouzo-poll-api-ckmhebiznl.now.sh/api';
 
 export function get(route) {
 	return fetch(API_URL + route).then(response => response.json());

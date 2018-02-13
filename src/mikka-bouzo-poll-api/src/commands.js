@@ -1,6 +1,6 @@
 import cuid from 'cuid';
 
-import {commandTypes, eventTypes} from '../../mikka-bouzo-common/constants';
+import {commandTypes, eventTypes} from './constants';
 import {count, isNullOrWhiteSpace} from './utils';
 
 const createErrorEvent = err => ({
