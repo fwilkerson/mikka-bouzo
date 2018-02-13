@@ -7,8 +7,6 @@ import {commandTypes, socketMessages} from '../constants';
 
 const WS_URL = 'wss://mikka-bouzo-poll-api-ckmhebiznl.now.sh/web-socket';
 const messageQueue = [];
-
-let webSocket;
 const store = createStore({
 	busy: false,
 	aggregateId: null,
@@ -17,6 +15,9 @@ const store = createStore({
 	pollResults: {},
 	totalVotes: 0
 });
+
+let webSocketState = WebSocket.CLOSED;
+let webSocket = null;
 
 store.registerActions(store => ({
 	createPoll(state, payload) {
@@ -53,6 +54,7 @@ if (!PRERENDER) {
 		timeout: 5e3,
 		maxAttempts: 3,
 		onopen: () => {
+			webSocketState = WebSocket.OPEN;
 			while (messageQueue.length) {
 				const message = messageQueue.shift();
 				webSocket.json(message);
@@ -70,14 +72,19 @@ if (!PRERENDER) {
 			}
 		},
 		onreconnect: console.info,
-		onclose: console.info,
-		onerror: console.error,
+		onclose: () => {
+			webSocketState = WebSocket.CLOSED;
+		},
+		onerror: err => {
+			webSocketState = WebSocket.CLOSED;
+			console.error(err);
+		},
 		onmaximum: console.info
 	});
 }
 
 function queueMessage(message) {
-	if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+	if (webSocket && webSocketState === WebSocket.OPEN) {
 		webSocket.json(message);
 	} else {
 		messageQueue.push(message);
