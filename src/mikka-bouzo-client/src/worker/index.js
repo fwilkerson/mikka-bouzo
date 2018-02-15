@@ -1,12 +1,9 @@
 import createStore from 'stockroom/worker';
-import Sockette from 'sockette';
 
-import {get, postCommand} from './data-service';
+import {connectSocket, get, postCommand, queueMessage} from './data-service';
 import {handleEvent} from './event-handlers';
 import {commandTypes, socketMessages} from '../constants';
 
-const WS_URL = 'wss://mikka-bouzo-poll-api-ckmhebiznl.now.sh/web-socket';
-const messageQueue = [];
 const store = createStore({
 	busy: false,
 	aggregateId: null,
@@ -15,78 +12,45 @@ const store = createStore({
 	pollResults: {},
 	totalVotes: 0
 });
+connectSocket(store);
+store.registerActions(store => ({createPoll, getPollById, submitVote}));
 
-let _ws;
-let sockette;
-
-store.registerActions(store => ({
-	createPoll(state, payload) {
-		postCommand({type: commandTypes.CREATE_POLL, payload})
-			.then(event => {
-				queueMessage({
-					type: socketMessages.SUBSCRIBE,
-					aggregateId: event.aggregateId
-				});
-				store.setState({...handleEvent(store.getState(), event), busy: false});
-			})
-			.catch(() => store.setState({busy: false}));
-		return {busy: true};
-	},
-	getPollById(state, id) {
-		queueMessage({type: socketMessages.SUBSCRIBE, aggregateId: id});
-		get(`/poll/${id}`)
-			.then(({events}) => {
-				store.setState({
-					...events.reduce(handleEvent, store.getState()),
-					busy: false,
-				});
-			})
-			.catch(() => store.setState({busy: false}));
-		return {busy: true};
-	},
-	submitVote(state, payload) {
-		postCommand({type: commandTypes.VOTE_ON_POLL, payload})
-			.then(console.log)
-			.catch(() => store.setState({busy: false}));
-		return {busy: true};
-	}
-}));
-
-if (!PRERENDER) {
-	sockette = new Sockette(WS_URL, {
-		timeout: 5e3,
-		maxAttempts: 3,
-		onopen: e => {
-			while (messageQueue.length) {
-				const message = messageQueue.shift();
-				sockette.json(message);
-			}
-
-			_ws = e.target;
-		},
-		onmessage: message => {
-			try {
-				const event = JSON.parse(message.data);
-				const state = store.getState();
-				if (event.aggregateId === state.aggregateId) {
-					store.setState(handleEvent(state, event));
-				}
-			} catch (err) {
-				console.error(err);
-			}
-		},
-		onreconnect: console.info,
-		onclose: console.info,
-		onerror: console.error,
-		onmaximum: console.info
-	});
+function subscribe(aggregateId) {
+	return {type: socketMessages.SUBSCRIBE, aggregateId};
 }
 
-function queueMessage(message) {
-	if (sockette && _ws.readyState === WebSocket.OPEN) {
-		sockette.json(message);
-	} else {
-		messageQueue.push(message);
+async function createPoll(state, payload) {
+	try {
+		store.setState({busy: true});
+		const event = await postCommand({type: commandTypes.CREATE_POLL, payload});
+		queueMessage(subscribe(event.aggregateId));
+		return {...handleEvent(store.getState(), event), busy: false};
+	} catch (err) {
+		console.error(err);
+		return {busy: false};
+	}
+}
+
+async function getPollById(state, id) {
+	try {
+		store.setState({busy: true});
+		queueMessage(subscribe(id));
+		const {events} = await get(`/poll/${id}`);
+		return {...events.reduce(handleEvent, store.getState()), busy: false};
+	} catch (err) {
+		console.error(err);
+		return {busy: false};
+	}
+}
+
+async function submitVote(state, payload) {
+	try {
+		store.setState({busy: true});
+		await postCommand({type: commandTypes.VOTE_ON_POLL, payload});
+	} catch (err) {
+		console.error(err);
+	} finally {
+		return {busy: false};
 	}
 }
 

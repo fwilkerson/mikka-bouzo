@@ -1,4 +1,4 @@
-import {eventTypes} from '../../../mikka-bouzo-common/constants';
+import {eventTypes} from '../constants';
 
 const eventHandlers = {
 	[eventTypes.POLL_CREATED]: (state, event) => {

@@ -45,6 +45,7 @@ class PollVote extends Component {
 	}
 
 	render(props, state) {
+		console.log(props)
 		return (
 			<section class="container">
 				<h3 style={{textAlign: 'center'}}>{props.pollQuestion}</h3>
@@ -83,7 +84,7 @@ class PollVote extends Component {
 	}
 }
 
-export default connect('aggregateId,multiSelect,pollQuestion,pollOptions', {
+export default connect('aggregateId,busy,pollQuestion,pollOptions', {
 	getPollById: 'getPollById',
 	submitVote: 'submitVote'
 })(PollVote);
