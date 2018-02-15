@@ -16,8 +16,8 @@ const store = createStore({
 	totalVotes: 0
 });
 
-let webSocketState = WebSocket.CLOSED;
-let webSocket = null;
+let _ws;
+let sockette;
 
 store.registerActions(store => ({
 	createPoll(state, payload) {
@@ -27,7 +27,7 @@ store.registerActions(store => ({
 					type: socketMessages.SUBSCRIBE,
 					aggregateId: event.aggregateId
 				});
-				store.setState({busy: false, ...handleEvent(store.getState(), event)});
+				store.setState({...handleEvent(store.getState(), event), busy: false});
 			})
 			.catch(() => store.setState({busy: false}));
 		return {busy: true};
@@ -36,13 +36,16 @@ store.registerActions(store => ({
 		queueMessage({type: socketMessages.SUBSCRIBE, aggregateId: id});
 		get(`/poll/${id}`)
 			.then(({events}) => {
-				store.setState(events.reduce(handleEvent, store.getState()));
+				store.setState({
+					...events.reduce(handleEvent, store.getState()),
+					busy: false,
+				});
 			})
 			.catch(() => store.setState({busy: false}));
 		return {busy: true};
 	},
 	submitVote(state, payload) {
-		postCommand({type: commandTypes.VOTE_ON_POLL, payload}, true)
+		postCommand({type: commandTypes.VOTE_ON_POLL, payload})
 			.then(console.log)
 			.catch(() => store.setState({busy: false}));
 		return {busy: true};
@@ -50,15 +53,16 @@ store.registerActions(store => ({
 }));
 
 if (!PRERENDER) {
-	webSocket = new Sockette(WS_URL, {
+	sockette = new Sockette(WS_URL, {
 		timeout: 5e3,
 		maxAttempts: 3,
-		onopen: () => {
-			webSocketState = WebSocket.OPEN;
+		onopen: e => {
 			while (messageQueue.length) {
 				const message = messageQueue.shift();
-				webSocket.json(message);
+				sockette.json(message);
 			}
+
+			_ws = e.target;
 		},
 		onmessage: message => {
 			try {
@@ -72,20 +76,15 @@ if (!PRERENDER) {
 			}
 		},
 		onreconnect: console.info,
-		onclose: () => {
-			webSocketState = WebSocket.CLOSED;
-		},
-		onerror: err => {
-			webSocketState = WebSocket.CLOSED;
-			console.error(err);
-		},
+		onclose: console.info,
+		onerror: console.error,
 		onmaximum: console.info
 	});
 }
 
 function queueMessage(message) {
-	if (webSocket && webSocketState === WebSocket.OPEN) {
-		webSocket.json(message);
+	if (sockette && _ws.readyState === WebSocket.OPEN) {
+		sockette.json(message);
 	} else {
 		messageQueue.push(message);
 	}
