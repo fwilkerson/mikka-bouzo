@@ -2,6 +2,12 @@ import {h, Component} from 'preact';
 import {route} from 'preact-router';
 import {connect} from 'unistore/preact';
 
+const styles = {
+	center: {textAlign: 'center'},
+	voteButton: {fontSize: 'small', margin: '0 .5rem'},
+	viewResultsLink: {cursor: 'pointer', lineHeight: '44px', padding: '0 3rem'}
+};
+
 class PollVote extends Component {
 	static defaultProps = {
 		multiSelect: false,
@@ -32,6 +38,8 @@ class PollVote extends Component {
 				return acc.concat(selectedOptions[key] ? key : []);
 			}, [])
 		});
+
+		this.viewResults();
 	};
 
 	viewResults = () => {
@@ -45,10 +53,9 @@ class PollVote extends Component {
 	}
 
 	render(props, state) {
-		console.log(props)
 		return (
 			<section class="container">
-				<h3 style={{textAlign: 'center'}}>{props.pollQuestion}</h3>
+				<h3 style={styles.center}>{props.pollQuestion}</h3>
 				{props.pollOptions.map(option => (
 					<label style={{fontWeight: '400'}} class="control control--checkbox">
 						{option}
@@ -62,18 +69,14 @@ class PollVote extends Component {
 				))}
 				<hr />
 				<button
-					style={{fontSize: 'small', margin: '0 .5rem'}}
+					style={styles.voteButton}
 					class="button-primary u-pull-right"
 					onClick={this.submitVote}
 				>
 					Vote
 				</button>
 				<a
-					style={{
-						cursor: 'pointer',
-						lineHeight: '44px',
-						padding: '0 3rem'
-					}}
+					style={styles.viewResultsLink}
 					class="u-pull-right"
 					onClick={this.viewResults}
 				>

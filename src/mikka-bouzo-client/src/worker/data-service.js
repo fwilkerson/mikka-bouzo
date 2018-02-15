@@ -38,6 +38,8 @@ export function connectSocket(store) {
 		onerror: console.error,
 		onmaximum: console.info
 	});
+
+	return store;
 }
 
 export function queueMessage(message) {

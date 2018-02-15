@@ -1,7 +1,7 @@
-import {eventTypes} from '../constants';
+import {events} from '../constants';
 
 const eventHandlers = {
-	[eventTypes.POLL_CREATED]: (state, event) => {
+	[events.POLL_CREATED]: (state, event) => {
 		const {aggregateId, payload: {pollQuestion, pollOptions}} = event;
 		const pollResults = {};
 		pollOptions.forEach(option => {
@@ -9,7 +9,7 @@ const eventHandlers = {
 		});
 		return {...state, aggregateId, pollResults, pollQuestion, pollOptions};
 	},
-	[eventTypes.POLL_VOTED_ON]: (state, event) => {
+	[events.POLL_VOTED_ON]: (state, event) => {
 		const {pollResults, totalVotes} = state;
 		const {payload} = event;
 		const updates = {};
