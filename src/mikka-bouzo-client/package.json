@@ -20,7 +20,7 @@
 	},
 	"devDependencies": {
 		"if-env": "^1.0.0",
-		"preact-cli": "^2.0.0",
-		"workerize-loader": "^1.0.1"
+		"preact-cli": "^2.2.1",
+		"workerize-loader": "^1.0.2"
 	}
 }
