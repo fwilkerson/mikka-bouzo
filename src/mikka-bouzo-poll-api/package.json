@@ -33,7 +33,7 @@
 		"ws": "^4.0.0"
 	},
 	"devDependencies": {
-		"microbundle": "^0.4.3",
+		"microbundle": "^0.4.4",
 		"xo": "^0.18.2"
 	},
 	"xo": {
