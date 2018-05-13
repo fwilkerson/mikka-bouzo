@@ -45,6 +45,7 @@ class CreatePoll extends Component {
 			<section class="container">
 				<h2 style={{textAlign: 'center'}}>Mikka Bouzo</h2>
 				<input
+					aria-label="poll question"
 					type="text"
 					class="u-full-width"
 					style={{fontSize: '2.5rem', height: '5rem'}}
@@ -54,10 +55,11 @@ class CreatePoll extends Component {
 				/>
 				{state.pollOptions.map((option, i) => (
 					<div>
-						<span style={{paddingTop: '1rem', position: 'absolute'}}>
+						<span style={{paddingTop: '.6rem', position: 'absolute'}}>
 							{i + 1}.
 						</span>
 						<input
+							aria-label="poll option"
 							type="text"
 							class="u-full-width"
 							style={{

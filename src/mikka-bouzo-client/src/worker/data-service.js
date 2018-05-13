@@ -10,7 +10,7 @@ let _ws;
 let sockette;
 
 export function connectSocket(store) {
-	if (PRERENDER) return;
+	if (PRERENDER) return store;
 
 	sockette = new Sockette(WS_URL, {
 		onopen(event) {

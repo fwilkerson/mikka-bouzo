@@ -1,16 +1,17 @@
 {
-  "name": "mikka-bouzo",
-  "short_name": "mikka-bouzo",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#fff",
-  "theme_color": "#673ab8",
-  "icons": [
-    {
-      "src": "/assets/icon.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
-  ]
+	"name": "mikka-bouzo",
+	"short_name": "mikka-bouzo",
+	"start_url": "/",
+	"display": "standalone",
+	"orientation": "portrait",
+	"background_color": "#fff",
+	"theme_color": "#1f7ead",
+	"description": "Create and poll and have others vote",
+	"icons": [
+		{
+			"src": "/assets/icon.png",
+			"type": "image/png",
+			"sizes": "512x512"
+		}
+	]
 }

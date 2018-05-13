@@ -30,10 +30,11 @@ class PollResults extends Component {
 					return (
 						<div class="progress-bar horizontal rounded">
 							<em>{key}</em>
+							<small class="u-pull-right">
+								<em>{percent}</em>
+							</small>
 							<div class="progress-track">
-								<div class="progress-fill" style={{width: percent}}>
-									<span>{percent}</span>
-								</div>
+								<div class="progress-fill" style={{width: percent}} />
 							</div>
 						</div>
 					);

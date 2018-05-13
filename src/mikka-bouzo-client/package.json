@@ -10,17 +10,18 @@
 		"dev": "preact watch"
 	},
 	"dependencies": {
-		"preact": "^8.2.1",
+		"preact": "^8.2.9",
 		"preact-compat": "^3.18.0",
 		"preact-router": "^2.6.0",
 		"skeleton-css": "^2.0.4",
 		"sockette": "^2.0.0",
 		"stockroom": "^1.0.1",
-		"unistore": "^3.0.4"
+		"unistore": "^3.0.5"
 	},
 	"devDependencies": {
 		"if-env": "^1.0.0",
 		"preact-cli": "^2.2.1",
+		"preact-cli-plugin-fast-async": "^1.0.0",
 		"workerize-loader": "^1.0.2"
 	}
 }

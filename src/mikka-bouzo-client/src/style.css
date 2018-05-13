@@ -1,6 +1,30 @@
 body,
 input {
+	color: #373d3f;
 	font-size: 16px;
+}
+
+a {
+	color: hsl(200, 70%, 35%);
+}
+
+a:hover {
+	color: hsl(200, 70%, 40%);
+}
+
+button.button-primary {
+	background-color: hsl(200, 70%, 40%);
+	border-color: hsl(200, 70%, 40%);
+}
+
+button.button-primary:hover,
+button.button-primary:focus {
+	background-color: hsl(200, 70%, 35%);
+	border-color: hsl(200, 70%, 35%);
+}
+
+input[type='text']:focus {
+	border-color: hsl(200, 70%, 40%);
 }
 
 .container {
@@ -31,11 +55,11 @@ input {
 	border-radius: 4px;
 }
 .control input:checked ~ .control__indicator {
-	background: #33c3f0;
+	background: hsl(200, 70%, 35%);
 }
 .control:hover input:not([disabled]):checked ~ .control__indicator,
 .control input:checked:focus ~ .control__indicator {
-	background: #1eaedb;
+	background: hsl(200, 70%, 40%);
 }
 .control input:disabled ~ .control__indicator {
 	background: #e6e6e6;
@@ -66,7 +90,7 @@ input {
 .horizontal.progress-bar {
 	height: 4.5rem;
 	width: 100%;
-	padding: 1.5rem 0;
+	padding: 2rem 0;
 }
 .horizontal .progress-track {
 	position: relative;
@@ -76,7 +100,7 @@ input {
 }
 .horizontal .progress-fill {
 	position: relative;
-	background: #33c3f0;
+	background: hsl(200, 70%, 35%);
 	height: 2rem;
 	width: 50%;
 	color: #fff;
